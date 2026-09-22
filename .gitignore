@@ -1,0 +1,7 @@
+# Private local account data - never commit this file
+keily-data.json
+
+# Local dependencies and environment settings
+node_modules/
+.env
+.DS_Store
