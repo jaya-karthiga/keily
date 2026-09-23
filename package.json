@@ -1,0 +1,15 @@
+{
+  "name": "keily-safe-space",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Keily - a responsive safety and wellbeing web application",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
