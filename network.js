@@ -116,4 +116,3 @@ window.addEventListener('load',()=>{
   `;document.head.append(atlasRedesign);
   const copy={"SAFETY, ON YOUR TERMS":"Safety tools","TRUSTED CIRCLE":"Your circle","WELLBEING":"Wellbeing","YOUR SETTINGS":"Settings","KEILY / DAILY CHECK-IN":"Today","VOICE MODE":"Voice companion","YOUR NEXT ESTIMATE":"Period plan","GENTLE REMINDER":"Reminder","YOUR SPACE":"Today"};$$('.eyebrow').forEach(label=>{const text=label.textContent.trim();if(copy[text])label.textContent=copy[text]});
 });
-
