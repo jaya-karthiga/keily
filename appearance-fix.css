@@ -1,0 +1,32 @@
+/* User appearance choices must win over the fixed reference-theme styling. */
+body[data-keily-scene="midnight"]{--scene-a:#4e5289;--scene-b:#1f4968;--scene-base:#070a1a}
+body[data-keily-scene="blush"]{--scene-a:#ffd6e6;--scene-b:#c8b8ff;--scene-base:#29152c}
+body[data-keily-scene="ocean"]{--scene-a:#91e8ff;--scene-b:#559cd6;--scene-base:#071b37}
+body[data-keily-scene="dawn"]{--scene-a:#ffe3b5;--scene-b:#ff9dc6;--scene-base:#351e47}
+body[data-keily-scene="forest"]{--scene-a:#bdf6d6;--scene-b:#4fbd9a;--scene-base:#092e33}
+body[data-keily-scene]{background:radial-gradient(circle at 8% 0,var(--scene-a),transparent 34%),radial-gradient(circle at 100% 100%,var(--scene-b),transparent 42%),var(--scene-base)!important;color:#f5f6ff!important}
+body[data-keily-scene] .dashboard{background:radial-gradient(circle at 85% 12%,color-mix(in srgb,var(--keily-glow) 32%,transparent),transparent 32%),linear-gradient(140deg,color-mix(in srgb,var(--keily-surface) 93%,var(--scene-a) 7%),var(--keily-surface))!important}
+body[data-keily-scene] .dashboard aside{background:linear-gradient(165deg,color-mix(in srgb,var(--keily-aside) 84%,var(--scene-a) 16%),var(--keily-aside))!important}
+body[data-keily-scene] .content{background:transparent!important}
+body[data-keily-scene] .card,body[data-keily-scene] .safety-card,body[data-keily-scene] .friend,body[data-keily-scene] .settings-panel,body[data-keily-scene] .appearance-studio{background:color-mix(in srgb,var(--keily-surface) 94%,white 6%)!important;border-color:color-mix(in srgb,var(--lilac) 35%,transparent)!important;color:#f5f6ff!important}
+body[data-keily-scene] .card h3,body[data-keily-scene] .safety-card h3,body[data-keily-scene] .settings-panel h3,body[data-keily-scene] .friend h4{color:#fff!important}
+body[data-keily-scene] .card p,body[data-keily-scene] .safety-card p,body[data-keily-scene] .settings-panel p,body[data-keily-scene] .friend p,body[data-keily-scene] .appearance-studio small,body[data-keily-scene] .studio-note{color:#c2cde5!important}
+body[data-keily-scene] .hero-card{background:radial-gradient(circle at 78% 40%,color-mix(in srgb,var(--keily-glow) 50%,transparent),transparent 34%),linear-gradient(125deg,color-mix(in srgb,var(--keily-surface) 68%,var(--lilac) 32%),var(--keily-surface))!important}
+body[data-keily-scene] #home .hero-card{border:1px solid color-mix(in srgb,var(--lilac) 48%,transparent)!important}
+body[data-keily-scene] #keily{background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--keily-glow) 36%,transparent),transparent 38%),radial-gradient(circle at 8% 0,var(--scene-a),transparent 42%),var(--scene-base)!important}
+body[data-keily-scene] .primary{background:linear-gradient(100deg,var(--lilac),var(--pink))!important;color:#fff!important}
+body[data-keily-scene] .safe-pill,body[data-keily-scene] .soft{border-color:color-mix(in srgb,var(--lilac) 50%,transparent)!important;color:#fff!important;background:color-mix(in srgb,var(--keily-surface) 78%,var(--lilac) 22%)!important}
+body[data-keily-scene] .dashboard aside .nav.active{background:color-mix(in srgb,var(--lilac) 35%,var(--keily-aside))!important;border-left-color:var(--pink)!important;border-top-color:var(--pink)!important}
+body[data-keily-scene] .style-choice.active{outline-color:var(--pink)!important}
+body[data-keily-font="modern"] #home :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="modern"] #home :is(p,button,label,small,span){font-family:Inter,"Segoe UI",Arial,sans-serif!important}
+body[data-keily-font="classic"] #home :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="classic"] #home :is(p,button,label,small,span){font-family:Georgia,"Times New Roman",serif!important}
+body[data-keily-font="rounded"] #home :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="rounded"] #home :is(p,button,label,small,span){font-family:"Trebuchet MS",Arial,sans-serif!important}
+body[data-keily-font="mono"] #home :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="mono"] #home :is(p,button,label,small,span){font-family:Consolas,"Courier New",monospace!important}
+body[data-keily-font="modern"] .dashboard :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="modern"] .dashboard :is(p,button,label,small,span){font-family:Inter,"Segoe UI",Arial,sans-serif!important}
+body[data-keily-font="classic"] .dashboard :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="classic"] .dashboard :is(p,button,label,small,span){font-family:Georgia,"Times New Roman",serif!important}
+body[data-keily-font="rounded"] .dashboard :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="rounded"] .dashboard :is(p,button,label,small,span){font-family:"Trebuchet MS",Arial,sans-serif!important}
+body[data-keily-font="mono"] .dashboard :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="mono"] .dashboard :is(p,button,label,small,span){font-family:Consolas,"Courier New",monospace!important}
+body[data-keily-font="modern"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="modern"] #keily :is(p,button,label,small,span){font-family:Inter,"Segoe UI",Arial,sans-serif!important}
+body[data-keily-font="classic"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="classic"] #keily :is(p,button,label,small,span){font-family:Georgia,"Times New Roman",serif!important}
+body[data-keily-font="rounded"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="rounded"] #keily :is(p,button,label,small,span){font-family:"Trebuchet MS",Arial,sans-serif!important}
+body[data-keily-font="mono"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="mono"] #keily :is(p,button,label,small,span){font-family:Consolas,"Courier New",monospace!important}
