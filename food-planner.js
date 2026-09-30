@@ -1,0 +1,112 @@
+(()=>{
+  const wellbeing=document.querySelector('#wellbeing');
+  if(!wellbeing||document.querySelector('#foodPlanner'))return;
+
+  const profile=()=>{try{return JSON.parse(localStorage.getItem('jarvisUser')||'{}')}catch{return {}}};
+  const storeKey=()=>`keilyFoodPreferences:${profile().id||'guest'}`;
+  const readSaved=()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}')}catch{return {}}};
+  const commonAllergies=['Peanuts','Tree nuts','Milk / dairy','Egg','Wheat / gluten','Soy','Sesame','Fish','Shellfish'];
+  const symptomChoices=['Cramps','Bloating','Nausea','Low energy','Headache','Other'];
+  const chart=[
+    {slot:'Breakfast',name:'Banana and oat porridge',ingredients:['Oats','Banana','Water'],allergens:['oats'],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Breakfast',name:'Ragi and date porridge',ingredients:['Ragi flour','Dates','Water'],allergens:[],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Lunch',name:'Vegetable moong dal khichdi',ingredients:['Rice','Moong dal','Carrot','Peas','Spinach','Tomato'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
+    {slot:'Lunch',name:'Chicken and vegetable rice bowl',ingredients:['Chicken','Rice','Carrot','Green beans','Spinach','Tomato'],allergens:[],diets:['omnivore'],ironRich:true},
+    {slot:'Snack',name:'Seasonal fruit bowl',ingredients:['Apple','Banana','Orange'],allergens:[],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Snack',name:'Yogurt and fruit',ingredients:['Yogurt','Banana','Berries'],allergens:['milk'],diets:['vegetarian','omnivore']},
+    {slot:'Dinner',name:'Vegetable soup with rice',ingredients:['Rice','Potato','Carrot','Tomato'],allergens:[],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Dinner',name:'Spinach and lentil soup with rice',ingredients:['Spinach','Lentils','Tomato','Rice'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
+    {slot:'Dinner',name:'Paneer and vegetable bowl',ingredients:['Paneer','Rice','Spinach','Tomato'],allergens:['milk'],diets:['vegetarian','omnivore']}
+  ];
+  const synonyms={
+    'peanut':['peanut','groundnut'], 'tree nuts':['almond','cashew','walnut','pistachio','hazelnut','pecan','brazil nut'],
+    'milk / dairy':['milk','dairy','yogurt','yoghurt','paneer','cheese','butter','ghee'], 'egg':['egg'],
+    'wheat / gluten':['wheat','gluten','barley','rye','semolina','suji','rava'], 'soy':['soy','soya'],
+    'sesame':['sesame','til'], 'fish':['fish'], 'shellfish':['shellfish','shrimp','prawn','crab','lobster'],
+    'legumes':['legume','lentil','dal','bean','pea','chickpea','moong']
+  };
+  const normalize=value=>String(value||'').trim().toLowerCase();
+  const saved=readSaved();
+  const allergies=saved.allergies||[];
+  const checked=(list,value)=>list.includes(value)?'checked':'';
+  const symptoms=saved.symptoms||[];
+  const card=document.createElement('article');
+  card.id='foodPlanner';
+  card.className='food-planner card';
+  card.innerHTML=`<div class="food-planner-heading"><div><p class="eyebrow">FOOD & WELLBEING</p><h3>A gentle food chart</h3><p>Save symptoms and allergies privately, then filter general meal ideas.</p></div><span class="food-private-badge">Saved on this device</span></div>
+    <form id="foodPreferences" class="food-preferences">
+      <fieldset><legend>What symptoms would you like to note?</legend><div class="food-choice-grid">${symptomChoices.map(item=>`<label class="food-choice"><input type="checkbox" name="symptoms" value="${item}" ${checked(symptoms,item)}><span>${item}</span></label>`).join('')}</div></fieldset>
+      <fieldset><legend>Choose any known allergies</legend><div class="food-choice-grid">${commonAllergies.map(item=>`<label class="food-choice"><input type="checkbox" name="allergies" value="${item}" ${checked(allergies,item)}><span>${item}</span></label>`).join('')}</div><label class="food-custom-label">Other allergy names<input id="customAllergies" type="text" maxlength="180" placeholder="Separate with commas" value="${(saved.customAllergies||'').replace(/[&<>"']/g,'')}"></label></fieldset>
+      <label class="food-diet-label">Food preference<select id="foodDiet"><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="omnivore">Include meat</option></select></label>
+      <button class="primary small" type="submit">Save and update chart</button>
+    </form>
+    <p class="food-note" id="foodNote">Meal ideas are general wellbeing suggestions, not treatment. Always check ingredients and cross-contact warnings with the food provider, especially for allergies.</p>
+    <div id="cycleFoodFocus" class="cycle-food-focus" aria-live="polite"></div>
+    <div id="mealChart" class="meal-chart" aria-live="polite"></div>
+    <aside class="swiggy-connect"><div><b>Order through Swiggy</b><p>Live menu and ordering access needs Swiggy production API approval. Keily will not send your symptoms or allergy notes to Swiggy.</p></div><a href="https://mcp.swiggy.com/builders/access/" target="_blank" rel="noopener noreferrer">Swiggy developer access</a></aside>`;
+  const header=wellbeing.querySelector('.section-head');
+  if(header)header.after(card);else wellbeing.prepend(card);
+  const form=card.querySelector('#foodPreferences');
+  const diet=card.querySelector('#foodDiet');
+  diet.value=saved.diet||'vegetarian';
+  const mealChart=card.querySelector('#mealChart');
+  const foodNote=card.querySelector('#foodNote');
+  const cycleFocus=card.querySelector('#cycleFoodFocus');
+
+  const cycleStage=()=>{
+    const savedUser=profile();
+    if(!savedUser.period)return null;
+    let safeData={};try{safeData=JSON.parse(localStorage.getItem('jarvisSafeData')||'{}')}catch{}
+    const period=safeData.period||{};
+    if(!period.last)return null;
+    const start=new Date(`${period.last}T12:00:00`);
+    if(Number.isNaN(start.getTime()))return null;
+    const today=new Date();today.setHours(12,0,0,0);
+    start.setHours(12,0,0,0);
+    const offset=Math.floor((today-start)/86400000);
+    if(offset<0)return null;
+    const length=Math.max(21,Math.min(40,Number(period.length)||28));
+    const day=offset%length+1;
+    const phase=day<=5?'period':day>length-7?'premenstrual':'between';
+    return {day,length,phase};
+  };
+
+  const allergensFromForm=()=>{
+    const selected=[...form.querySelectorAll('input[name="allergies"]:checked')].map(input=>input.value);
+    const custom=card.querySelector('#customAllergies').value.split(',').map(normalize).filter(Boolean);
+    return [...new Set([...selected,...custom])];
+  };
+  const safeForAllergy=meal=>{
+    const searchable=normalize([...meal.ingredients,...meal.allergens].join(' '));
+    return !allergiesFromForm().some(item=>{
+      const key=normalize(item),words=synonyms[key]||[key];
+      return words.some(word=>searchable.includes(normalize(word)));
+    });
+  };
+  const render=()=>{
+    const selectedDiet=diet.value;
+    const cycle=cycleStage();
+    if(cycle?.phase==='period')cycleFocus.innerHTML=`<b>Estimated period day ${cycle.day} of ${cycle.length}</b><p>Consider including iron-containing foods such as pulses and leafy greens if they suit your diet and allergies. Pair plant sources with vitamin C foods such as tomatoes or fruit. This is general food information, not treatment.</p>`;
+    else if(cycle?.phase==='premenstrual')cycleFocus.innerHTML=`<b>Estimated days before your next period</b><p>If appetite changes, a balanced diet and smaller regular meals may suit some people. Use the chart as flexible ideas and choose what feels comfortable.</p>`;
+    else if(cycle)cycleFocus.innerHTML=`<b>Estimated cycle day ${cycle.day} of ${cycle.length}</b><p>There is no special food requirement for this estimated stage. Use the chart for varied, balanced meal ideas.</p>`;
+    else cycleFocus.innerHTML=`<b>Want cycle-aware notes?</b><p>Save a recent period start date and cycle length in the optional period tools. The estimate can be off if your cycle varies.</p>`;
+    const slots=['Breakfast','Lunch','Snack','Dinner'];
+    mealChart.innerHTML=slots.map(slot=>{
+      const options=chart.filter(meal=>meal.slot===slot&&meal.diets.includes(selectedDiet)&&safeForAllergy(meal));
+      if(cycle?.phase==='period')options.sort((a,b)=>Number(!!b.ironRich)-Number(!!a.ironRich));
+      return `<section class="meal-slot"><h4>${slot}</h4>${options.length?options.map(meal=>`<article class="meal-suggestion"><b>${meal.name}</b>${cycle?.phase==='period'&&meal.ironRich?'<em>Contains iron-rich ingredients</em>':''}<small>Ingredients: ${meal.ingredients.join(', ')}</small></article>`).join(''):'<p class="no-meal">No chart idea passes your current filters for this meal. Check your allergy list or choose another food preference.</p>'}</section>`;
+    }).join('');
+    const selectedSymptoms=[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value);
+    foodNote.textContent=selectedSymptoms.length?`Noted: ${selectedSymptoms.join(', ')}. These are general meal ideas, not symptom treatment. Check ingredients and cross-contact warnings with the food provider, especially for allergies.`:'Meal ideas are general wellbeing suggestions, not treatment. Always check ingredients and cross-contact warnings with the food provider, especially for allergies.';
+  };
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergensFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value};
+    try{localStorage.setItem(storeKey(),JSON.stringify(preferences));render();const button=form.querySelector('button[type="submit"]');button.textContent='Saved ✓';setTimeout(()=>button.textContent='Save and update chart',1500)}catch{alert('Could not save these preferences on this device.')}
+  });
+  diet.addEventListener('change',render);
+  form.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener('change',render));
+  card.querySelector('#customAllergies').addEventListener('input',render);
+  document.querySelector('#periodForm')?.addEventListener('submit',()=>setTimeout(render,0));
+  render();
+})();

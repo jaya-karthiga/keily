@@ -1,0 +1,29 @@
+.food-planner{display:grid;gap:16px;margin:0 0 18px;padding:20px!important;border-radius:18px!important}
+.food-planner-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.food-planner-heading h3{margin:4px 0 5px!important;font-size:22px!important}
+.food-planner-heading p:not(.eyebrow){margin:0;color:var(--keily-muted-text)!important;font-size:12px;line-height:1.5}
+.food-private-badge{flex:none;border:1px solid color-mix(in srgb,var(--mint) 45%,transparent);border-radius:99px;padding:6px 9px;color:var(--mint);font-size:10px;font-weight:700}
+.food-preferences{display:grid;gap:14px}
+.food-preferences fieldset{min-width:0;margin:0;padding:13px;border:1px solid color-mix(in srgb,var(--lilac) 30%,transparent);border-radius:14px}
+.food-preferences legend{padding:0 5px;color:var(--keily-text);font-size:12px;font-weight:750}
+.food-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.food-choice{display:flex;align-items:center;gap:7px;min-height:36px;padding:7px 9px;border:1px solid #ffffff16;border-radius:10px;background:#ffffff08;color:var(--keily-muted-text);font-size:11px;cursor:pointer}
+.food-choice:has(input:checked){border-color:var(--lilac);background:color-mix(in srgb,var(--lilac) 17%,transparent);color:var(--keily-text)}
+.food-choice input{flex:none;accent-color:var(--lilac)}
+.food-custom-label,.food-diet-label{display:grid;gap:6px;margin-top:10px;color:var(--keily-text);font-size:11px;font-weight:700}
+.food-custom-label input,.food-diet-label select{min-width:0;width:100%;min-height:42px;padding:9px 11px;border:1px solid color-mix(in srgb,var(--lilac) 35%,transparent);border-radius:10px;background:color-mix(in srgb,var(--keily-aside) 86%,transparent);color:var(--keily-text)}
+.food-note{margin:0;color:var(--keily-muted-text)!important;font-size:11px;line-height:1.55}
+.cycle-food-focus{padding:13px 15px;border-left:3px solid var(--mint);border-radius:12px;background:color-mix(in srgb,var(--mint) 10%,var(--keily-aside));color:var(--keily-text)}
+.cycle-food-focus b{font-size:12px}.cycle-food-focus p{margin:5px 0 0;color:var(--keily-muted-text);font-size:11px;line-height:1.5}
+.meal-chart{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.meal-slot{min-width:0;padding:12px;border:1px solid color-mix(in srgb,var(--lilac) 24%,transparent);border-radius:13px;background:#ffffff05}
+.meal-slot h4{margin:0 0 8px;color:var(--lilac);font-size:12px;letter-spacing:.04em}
+.meal-suggestion{display:grid;gap:5px;padding:9px 0;border-top:1px solid #ffffff12}
+.meal-suggestion:first-of-type{border-top:0;padding-top:0}.meal-suggestion b{color:var(--keily-text);font-size:12px;line-height:1.35}
+.meal-suggestion small{color:var(--keily-muted-text);font-size:10px;line-height:1.4}
+.meal-suggestion em{width:max-content;max-width:100%;padding:3px 6px;border-radius:99px;background:color-mix(in srgb,var(--mint) 15%,transparent);color:var(--mint);font-size:9px;font-style:normal;font-weight:700}
+.no-meal{margin:0;color:var(--keily-muted-text);font-size:11px;line-height:1.45}
+.swiggy-connect{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid color-mix(in srgb,var(--pink) 32%,transparent);border-radius:13px;background:color-mix(in srgb,var(--pink) 8%,transparent)}
+.swiggy-connect b{color:var(--keily-text);font-size:12px}.swiggy-connect p{margin:4px 0 0;color:var(--keily-muted-text);font-size:10px;line-height:1.45}
+.swiggy-connect a{flex:none;padding:8px 10px;border-radius:9px;background:linear-gradient(100deg,var(--lilac),var(--pink));color:#fff;font-size:10px;font-weight:750;text-decoration:none}
+@media(max-width:700px){.food-planner{gap:13px;margin:0 -1px 14px;padding:14px!important}.food-planner-heading{display:grid;gap:8px}.food-planner-heading h3{font-size:20px!important}.food-private-badge{width:max-content}.food-preferences fieldset{padding:10px}.food-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.food-choice{min-height:40px;padding:7px;font-size:10px}.meal-chart{grid-template-columns:minmax(0,1fr)}.meal-slot{padding:11px}.swiggy-connect{align-items:flex-start;flex-direction:column}.swiggy-connect a{min-height:38px;display:inline-flex;align-items:center}.food-preferences button{min-height:42px}}
