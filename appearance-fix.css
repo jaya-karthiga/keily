@@ -1,9 +1,9 @@
 /* User appearance choices must win over the fixed reference-theme styling. */
-body[data-keily-scene="midnight"]{--scene-a:#4e5289;--scene-b:#1f4968;--scene-base:#070a1a}
-body[data-keily-scene="blush"]{--scene-a:#ffd6e6;--scene-b:#c8b8ff;--scene-base:#29152c}
-body[data-keily-scene="ocean"]{--scene-a:#91e8ff;--scene-b:#559cd6;--scene-base:#071b37}
-body[data-keily-scene="dawn"]{--scene-a:#ffe3b5;--scene-b:#ff9dc6;--scene-base:#351e47}
-body[data-keily-scene="forest"]{--scene-a:#bdf6d6;--scene-b:#4fbd9a;--scene-base:#092e33}
+body[data-keily-scene="midnight"]{--scene-a:#414d91;--scene-b:#245877;--scene-base:#090e25}
+body[data-keily-scene="blush"]{--scene-a:#713b62;--scene-b:#443273;--scene-base:#1c132c}
+body[data-keily-scene="ocean"]{--scene-a:#14647c;--scene-b:#314f9b;--scene-base:#071c30}
+body[data-keily-scene="dawn"]{--scene-a:#83514b;--scene-b:#79406f;--scene-base:#24152b}
+body[data-keily-scene="forest"]{--scene-a:#24614c;--scene-b:#1b5961;--scene-base:#092222}
 body[data-keily-scene]{background:radial-gradient(circle at 8% 0,var(--scene-a),transparent 34%),radial-gradient(circle at 100% 100%,var(--scene-b),transparent 42%),var(--scene-base)!important;color:#f5f6ff!important}
 body[data-keily-scene] .dashboard{background:radial-gradient(circle at 85% 12%,color-mix(in srgb,var(--keily-glow) 32%,transparent),transparent 32%),linear-gradient(140deg,color-mix(in srgb,var(--keily-surface) 93%,var(--scene-a) 7%),var(--keily-surface))!important}
 body[data-keily-scene] .dashboard aside{background:linear-gradient(165deg,color-mix(in srgb,var(--keily-aside) 84%,var(--scene-a) 16%),var(--keily-aside))!important}
@@ -30,3 +30,69 @@ body[data-keily-font="modern"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-fon
 body[data-keily-font="classic"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="classic"] #keily :is(p,button,label,small,span){font-family:Georgia,"Times New Roman",serif!important}
 body[data-keily-font="rounded"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="rounded"] #keily :is(p,button,label,small,span){font-family:"Trebuchet MS",Arial,sans-serif!important}
 body[data-keily-font="mono"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="mono"] #keily :is(p,button,label,small,span){font-family:Consolas,"Courier New",monospace!important}
+
+/* Mobile: compact brand header, thumb-friendly bottom navigation, and single-column content. */
+@media(max-width:700px){
+  html,body{min-height:100%;overflow-x:hidden}
+  .shell{width:100%!important;margin:0!important}
+  .dashboard{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto 1fr!important;width:100%!important;min-height:100dvh!important;border:0!important;border-radius:0!important;overflow:visible!important}
+  .dashboard aside{position:sticky!important;top:0!important;z-index:20!important;display:block!important;width:100%!important;padding:10px 14px 7px!important;background:color-mix(in srgb,var(--keily-aside) 94%,transparent)!important;backdrop-filter:blur(18px)!important;border-bottom:1px solid #ffffff18!important}
+  .dashboard aside .brand{display:flex!important;position:relative!important;left:auto!important;top:auto!important;align-items:center!important;gap:9px!important;padding:0!important;border:0!important}
+  .dashboard aside .brand .logo{width:35px!important;height:35px!important;font-size:18px!important;border-radius:12px!important}
+  .dashboard aside .brand h1{font-size:15px!important;letter-spacing:.11em!important}
+  .dashboard aside .brand p{margin:2px 0 0!important;font-size:9px!important;letter-spacing:.14em!important}
+  .dashboard aside nav{position:fixed!important;z-index:50!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:none!important;display:flex!important;justify-content:space-around!important;align-items:stretch!important;gap:2px!important;margin:0!important;padding:7px 5px calc(7px + env(safe-area-inset-bottom))!important;border:0!important;border-top:1px solid #ffffff24!important;border-radius:17px 17px 0 0!important;background:color-mix(in srgb,var(--keily-aside) 93%,transparent)!important;backdrop-filter:blur(20px)!important;box-shadow:0 -8px 28px #03081755!important;overflow-x:auto!important;scrollbar-width:none!important}
+  .dashboard aside nav::-webkit-scrollbar{display:none!important}
+  .dashboard aside .nav{flex:1 0 48px!important;min-width:48px!important;min-height:54px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:3px!important;margin:0!important;padding:5px 2px!important;border:0!important;border-top:2px solid transparent!important;border-radius:10px!important;background:transparent!important;color:#c1cce3!important;font-size:17px!important;line-height:1!important;white-space:nowrap!important}
+  .dashboard aside .nav span{display:block!important;margin:0!important;font-size:9px!important;line-height:1.15!important}
+  .dashboard aside .nav.active{color:#fff!important;background:color-mix(in srgb,var(--lilac) 20%,transparent)!important;border-top-color:var(--pink)!important}
+  .dashboard aside .profile{position:absolute!important;right:14px!important;top:10px!important;left:auto!important;bottom:auto!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
+  .dashboard aside .profile .avatar{width:34px!important;height:34px!important;margin:0!important}
+  .content{width:100%!important;min-width:0!important;padding:14px 14px calc(82px + env(safe-area-inset-bottom))!important}
+  .topbar{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:10px!important;padding:8px 0 15px!important}
+  .topbar>div{flex:1 1 100%!important;min-width:0!important;max-width:100%!important}
+  .topbar h2{font-size:clamp(25px,7vw,32px)!important;line-height:1.08!important;margin:6px 0 0!important;overflow-wrap:anywhere!important}
+  .topbar .safe-pill{width:auto!important;min-height:42px!important;margin:0!important;padding:9px 13px!important;font-size:12px!important;white-space:nowrap!important}
+  .section-head{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:10px!important;margin:0 0 16px!important;padding:0 0 14px!important}
+  .section-head h3{font-size:clamp(24px,6vw,30px)!important;line-height:1.1!important}
+  .section-head .primary,.section-head .soft{min-height:42px!important}
+  #home .hero-card{min-height:0!important;margin:14px 0 0!important;padding:23px 18px!important;border-radius:20px!important}
+  #home .hero-card h3{font-size:clamp(27px,7vw,36px)!important;line-height:1.05!important}
+  #home .hero-card p:not(.eyebrow){font-size:14px!important;line-height:1.5!important}
+  .moods{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin-top:18px!important}
+  .moods button{min-width:0!important;min-height:68px!important;padding:10px 7px!important;border-radius:13px!important;font-size:21px!important}
+  .moods small{font-size:11px!important}
+  .grid,.period-panel,.safety-grid,.settings-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important;margin-top:13px!important}
+  .grid .card,.card,.safety-card,.settings-panel{min-width:0!important;padding:15px!important;border-radius:16px!important;gap:11px!important}
+  .grid .card h3,.card h3,.safety-card h3{font-size:16px!important;line-height:1.25!important;overflow-wrap:anywhere!important}
+  .grid .card p,.card p,.safety-card p{font-size:12px!important;line-height:1.45!important;overflow-wrap:anywhere!important}
+  .card .soft{min-height:40px!important;padding:8px 11px!important}
+  .friend{display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;gap:9px!important;min-width:0!important}
+  .friend button{grid-column:2!important;width:max-content!important;min-height:40px!important}
+  .friend button+button{margin-left:0!important}
+  .cycle-card{min-height:230px!important;padding:20px!important}
+  .cycle-ring{right:17px!important;bottom:18px!important;width:75px!important;height:75px!important}
+  .settings-view{width:100%!important;padding-bottom:10px!important}
+  .appearance-studio{gap:16px!important;width:100%!important}
+  .studio-group{min-width:0!important;padding-top:13px!important}
+  .studio-group>b{font-size:11px!important}
+  .palette-list,.font-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  .palette-choice{min-height:60px!important;padding:9px!important;font-size:11px!important}
+  .scene-list{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important}
+  .scene-choice{height:44px!important;min-height:44px!important;border-radius:12px!important}
+  .font-choice{min-height:48px!important}
+  #keily{position:fixed!important;z-index:30!important;inset:0!important;min-height:100dvh!important;margin:0!important;padding:0 14px calc(18px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;border-radius:0!important}
+  #keily .section-head{position:sticky!important;top:0!important;z-index:3!important;display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin:0 -14px!important;padding:13px 14px!important;background:color-mix(in srgb,var(--keily-aside) 88%,transparent)!important;backdrop-filter:blur(14px)!important;border-bottom:1px solid #ffffff1a!important}
+  #keily .section-head h3{font-size:15px!important;letter-spacing:.11em!important}
+  #keily .section-head h3:after{font-size:9px!important;letter-spacing:.15em!important}
+  #keily .section-head .soft{flex:0 0 auto!important;min-height:38px!important;font-size:11px!important;padding:7px 10px!important}
+  #keily .hero-card{min-height:calc(100dvh - 74px)!important;padding:20px 5px!important;gap:18px!important}
+  #keily .orb-wrap{width:min(54vw,215px)!important;height:min(54vw,215px)!important;margin:0 auto!important}
+  #keily .orb{width:min(48vw,190px)!important;height:min(48vw,190px)!important;min-width:0!important;min-height:0!important}
+  #keily .hero-card h3{font-size:clamp(29px,8vw,37px)!important;line-height:1.08!important}
+  #keily .hero-card p:not(.eyebrow){font-size:13px!important;line-height:1.5!important}
+  #keily .hero-card .primary{min-height:48px!important;margin-top:8px!important}
+  #keily .keily-text-form{display:flex!important;gap:7px!important;width:100%!important;margin:12px auto 0!important}
+  #keily .keily-text-form input{min-width:0!important;min-height:46px!important;font-size:13px!important}
+  #keily .keily-text-form button{min-width:46px!important;min-height:46px!important}
+}
