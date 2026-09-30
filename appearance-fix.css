@@ -31,6 +31,30 @@ body[data-keily-font="classic"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-fo
 body[data-keily-font="rounded"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="rounded"] #keily :is(p,button,label,small,span){font-family:"Trebuchet MS",Arial,sans-serif!important}
 body[data-keily-font="mono"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font="mono"] #keily :is(p,button,label,small,span){font-family:Consolas,"Courier New",monospace!important}
 
+/* Text tone is independent from accent colors and keeps foreground contrast consistent. */
+body[data-keily-text] .dashboard :is(.topbar h2,.section-head h3,.card h3,.safety-card h3,.settings-panel h3,.friend h4,.cycle-card h3){color:var(--keily-text)!important}
+body[data-keily-text] #home .hero-card h3,body[data-keily-text] #keily .hero-card h3{color:var(--keily-text)!important}
+body[data-keily-text] .dashboard p:not(.eyebrow),body[data-keily-text] .dashboard small,body[data-keily-text] .dashboard .studio-note{color:var(--keily-muted-text)!important}
+body[data-keily-text] #home .hero-card p:not(.eyebrow),body[data-keily-text] #keily .hero-card p:not(.eyebrow){color:var(--keily-muted-text)!important}
+body[data-keily-text] .dashboard aside .nav{color:var(--keily-muted-text)!important}
+body[data-keily-text] .dashboard aside .nav.active{color:var(--keily-text)!important}
+body[data-keily-text] .text-tone-choice span{color:var(--keily-text)!important}
+body[data-keily-text="warm"]{--keily-text:#fff3df;--keily-muted-text:#e3cfad}
+body[data-keily-text="ice"]{--keily-text:#e8f6ff;--keily-muted-text:#b9d9ef}
+body[data-keily-text="lilac"]{--keily-text:#f3eaff;--keily-muted-text:#d4c2e8}
+
+/* Account card and locally saved profile artwork. */
+.account-panel{display:grid!important;grid-template-columns:104px minmax(0,1fr)!important;align-items:start!important;gap:17px!important;min-height:220px!important}
+.account-avatar-stack{display:grid;justify-items:center;gap:9px}
+.account-avatar-preview{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--lilac);background:var(--keily-aside);box-shadow:0 8px 24px #0004}
+.avatar-upload{display:inline-grid;place-items:center;min-height:36px;padding:7px 10px;border:1px solid var(--lilac);border-radius:10px;color:var(--keily-text);font-size:11px;font-weight:700;cursor:pointer}
+.avatar-upload:hover{background:color-mix(in srgb,var(--lilac) 22%,transparent)}
+.avatar-upload-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.account-info{min-width:0}.account-info .eyebrow{margin:2px 0 7px}.account-info h3{margin:0 0 5px!important}.account-info>p{overflow-wrap:anywhere}.account-avatar-note{margin-top:10px!important}
+.profile-doodles{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.profile-doodle{width:39px;height:39px;padding:2px;border:2px solid transparent;border-radius:50%;background:#ffffff12;cursor:pointer;transition:transform .15s,border-color .15s}
+.profile-doodle img{display:block;width:100%;height:100%;border-radius:50%}.profile-doodle:hover,.profile-doodle.active{border-color:var(--pink);transform:translateY(-1px)}
+
 /* Mobile: compact brand header, thumb-friendly bottom navigation, and single-column content. */
 @media(max-width:700px){
   html,body{min-height:100%;overflow-x:hidden}
@@ -73,6 +97,8 @@ body[data-keily-font="mono"] #keily :is(h1,h2,h3,h4,h5,h6),body[data-keily-font=
   .cycle-card{min-height:230px!important;padding:20px!important}
   .cycle-ring{right:17px!important;bottom:18px!important;width:75px!important;height:75px!important}
   .settings-view{width:100%!important;padding-bottom:10px!important}
+  .account-panel{grid-template-columns:80px minmax(0,1fr)!important;gap:12px!important;min-height:0!important;padding:14px!important}
+  .account-avatar-preview{width:72px;height:72px}.profile-doodle{width:36px;height:36px}.profile-doodles{gap:6px}.account-avatar-note{font-size:11px!important}
   .appearance-studio{gap:16px!important;width:100%!important}
   .studio-group{min-width:0!important;padding-top:13px!important}
   .studio-group>b{font-size:11px!important}
