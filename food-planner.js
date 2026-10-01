@@ -6,15 +6,12 @@
   const commonAllergies=['Peanuts','Tree nuts','Milk / dairy','Egg','Wheat / gluten','Soy','Sesame','Fish','Shellfish'];
   const symptomChoices=['Cramps','Bloating','Nausea','Low energy','Headache','Other'];
   let chart=[
-    {slot:'Breakfast',name:'Banana and oat porridge',ingredients:['Oats','Banana','Water'],allergens:['oats'],diets:['vegan','vegetarian','omnivore']},
-    {slot:'Breakfast',name:'Ragi and date porridge',ingredients:['Ragi flour','Dates','Water'],allergens:[],diets:['vegan','vegetarian','omnivore']},
-    {slot:'Lunch',name:'Vegetable moong dal khichdi',ingredients:['Rice','Moong dal','Carrot','Peas','Spinach','Tomato'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
-    {slot:'Lunch',name:'Chicken and vegetable rice bowl',ingredients:['Chicken','Rice','Carrot','Green beans','Spinach','Tomato'],allergens:[],diets:['omnivore'],ironRich:true},
-    {slot:'Snack',name:'Seasonal fruit bowl',ingredients:['Apple','Banana','Orange'],allergens:[],diets:['vegan','vegetarian','omnivore']},
-    {slot:'Snack',name:'Yogurt and fruit',ingredients:['Yogurt','Banana','Berries'],allergens:['milk'],diets:['vegetarian','omnivore']},
-    {slot:'Dinner',name:'Vegetable soup with rice',ingredients:['Rice','Potato','Carrot','Tomato'],allergens:[],diets:['vegan','vegetarian','omnivore']},
-    {slot:'Dinner',name:'Spinach and lentil soup with rice',ingredients:['Spinach','Lentils','Tomato','Rice'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
-    {slot:'Dinner',name:'Paneer and vegetable bowl',ingredients:['Paneer','Rice','Spinach','Tomato'],allergens:['milk'],diets:['vegetarian','omnivore']}
+    {slot:'Morning',name:'Banana and oat porridge',ingredients:['Oats','Banana','Water'],allergens:['oats'],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Afternoon',name:'Vegetable moong dal khichdi',ingredients:['Rice','Moong dal','Carrot','Peas','Spinach','Tomato'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
+    {slot:'Afternoon',name:'Chicken and vegetable rice bowl',ingredients:['Chicken','Rice','Carrot','Green beans','Spinach','Tomato'],allergens:[],diets:['omnivore'],ironRich:true},
+    {slot:'Night',name:'Vegetable soup with rice',ingredients:['Rice','Potato','Carrot','Tomato'],allergens:[],diets:['vegan','vegetarian','omnivore']},
+    {slot:'Night',name:'Spinach and lentil soup with rice',ingredients:['Spinach','Lentils','Tomato','Rice'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
+    {slot:'Night',name:'Paneer and vegetable bowl',ingredients:['Paneer','Rice','Spinach','Tomato'],allergens:['milk'],diets:['vegetarian','omnivore']}
   ];
   const synonyms={
     'peanut':['peanut','groundnut'], 'tree nuts':['almond','cashew','walnut','pistachio','hazelnut','pecan','brazil nut'],
@@ -35,13 +32,13 @@
     <form id="foodPreferences" class="food-preferences">
       <fieldset><legend>What symptoms would you like to note?</legend><div class="food-choice-grid">${symptomChoices.map(item=>`<label class="food-choice"><input type="checkbox" name="symptoms" value="${item}" ${checked(symptoms,item)}><span>${item}</span></label>`).join('')}</div></fieldset>
       <fieldset><legend>Choose any known allergies</legend><div class="food-choice-grid">${commonAllergies.map(item=>`<label class="food-choice"><input type="checkbox" name="allergies" value="${item}" ${checked(allergies,item)}><span>${item}</span></label>`).join('')}</div><label class="food-custom-label">Other allergy names<input id="customAllergies" type="text" maxlength="180" placeholder="Separate with commas" value="${(saved.customAllergies||'').replace(/[&<>"']/g,'')}"></label></fieldset>
+      <fieldset><legend>Which meal times should be on your chart? Tick all that apply.</legend><div class="food-choice-grid"><label class="food-choice"><input type="checkbox" name="mealSlots" value="Morning"><span>Morning</span></label><label class="food-choice"><input type="checkbox" name="mealSlots" value="Afternoon"><span>Afternoon</span></label><label class="food-choice"><input type="checkbox" name="mealSlots" value="Night"><span>Night</span></label></div></fieldset>
       <label class="food-diet-label">Food preference<select id="foodDiet"><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="omnivore">Include meat</option></select></label>
       <button class="primary small" type="submit">Save and update chart</button>
     </form>
     <p class="food-note" id="foodNote">Meal ideas are general wellbeing suggestions, not treatment. Always check ingredients and cross-contact warnings with the food provider, especially for allergies.</p>
     <div id="cycleFoodFocus" class="cycle-food-focus" aria-live="polite"></div>
     <div id="mealChart" class="meal-chart" aria-live="polite"></div>
-    <aside class="swiggy-connect"><div><b>Order through Swiggy</b><p>Live menu and ordering access needs Swiggy production API approval. Keily will not send your symptoms or allergy notes to Swiggy.</p></div><a href="https://mcp.swiggy.com/builders/access/" target="_blank" rel="noopener noreferrer">Swiggy developer access</a></aside>`;
   const header=wellbeing.querySelector('.section-head');
   if(header)header.after(card);else wellbeing.prepend(card);
   const form=card.querySelector('#foodPreferences');
@@ -51,6 +48,7 @@
   const foodNote=card.querySelector('#foodNote');
   const cycleFocus=card.querySelector('#cycleFoodFocus');
   const apiHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('keilyToken')||''}`,'Content-Type':'application/json'});
+  const normalizeChartSlots=meals=>(meals||[]).map(meal=>({...meal,slot:({Breakfast:'Morning',Lunch:'Afternoon',Dinner:'Night'})[meal.slot]||meal.slot})).filter(meal=>['Morning','Afternoon','Night'].includes(meal.slot));
   const loadAccountFood=async()=>{
     try{
       const response=await fetch('/api/food-preferences',{headers:apiHeaders()});
@@ -58,14 +56,16 @@
       const preferences=await response.json();
       form.querySelectorAll('input[name="symptoms"]').forEach(input=>input.checked=(preferences.symptoms||[]).includes(input.value));
       form.querySelectorAll('input[name="allergies"]').forEach(input=>input.checked=(preferences.allergies||[]).includes(input.value));
+      form.querySelectorAll('input[name="mealSlots"]').forEach(input=>input.checked=(preferences.mealSlots||[]).includes(input.value));
       card.querySelector('#customAllergies').value=preferences.customAllergies||'';
       diet.value=preferences.diet||'vegetarian';
       render();
+      if(!(preferences.mealSlots||[]).length){foodNote.textContent='Tick at least one meal time, then save to generate your food chart.';return}
       foodNote.textContent='Generating your food chart with Gemini…';
       const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});
       const chartPayload=await chartResponse.json();
       if(!chartResponse.ok)throw new Error(chartPayload.error||'Could not generate your food chart.');
-      chart=chartPayload.meals||[];
+      chart=normalizeChartSlots(chartPayload.meals);
       render();
     }catch(error){foodNote.textContent=`${error.message} Save your preferences to try again.`}
   };
@@ -107,7 +107,7 @@
     else if(cycle?.phase==='premenstrual')cycleFocus.innerHTML=`<b>Estimated days before your next period</b><p>If appetite changes, a balanced diet and smaller regular meals may suit some people. Use the chart as flexible ideas and choose what feels comfortable.</p>`;
     else if(cycle)cycleFocus.innerHTML=`<b>Estimated cycle day ${cycle.day} of ${cycle.length}</b><p>There is no special food requirement for this estimated stage. Use the chart for varied, balanced meal ideas.</p>`;
     else cycleFocus.innerHTML=`<b>Want cycle-aware notes?</b><p>Save a recent period start date and cycle length in the optional period tools. The estimate can be off if your cycle varies.</p>`;
-    const slots=['Breakfast','Lunch','Snack','Dinner'];
+    const slots=[...form.querySelectorAll('input[name="mealSlots"]:checked')].map(input=>input.value);
     mealChart.innerHTML=slots.map(slot=>{
       const options=chart.filter(meal=>meal.slot===slot&&meal.diets.includes(selectedDiet)&&safeForAllergy(meal));
       if(cycle?.phase==='period')options.sort((a,b)=>Number(!!b.ironRich)-Number(!!a.ironRich));
@@ -118,9 +118,11 @@
   };
   form.addEventListener('submit',async event=>{
     event.preventDefault();
-    const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergiesFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value};
+    const mealSlots=[...form.querySelectorAll('input[name="mealSlots"]:checked')].map(input=>input.value);
+    if(!mealSlots.length){foodNote.textContent='Tick at least one meal time for your chart.';return}
+    const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergiesFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value,mealSlots};
     const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving…';
-    try{const response=await fetch('/api/food-preferences',{method:'PUT',headers:apiHeaders(),body:JSON.stringify(preferences)});const payload=await response.json();if(!response.ok)throw new Error(payload.error||'Could not save your preferences.');foodNote.textContent='Preferences saved to your account. Generating an updated chart with Gemini…';const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});const chartPayload=await chartResponse.json();if(!chartResponse.ok)throw new Error(chartPayload.error||'Preferences were saved, but Gemini could not generate the chart.');chart=chartPayload.meals||[];render();button.textContent='Saved ✓';setTimeout(()=>{button.textContent='Save and update chart';button.disabled=false},1500)}catch(error){foodNote.textContent=error.message;button.textContent='Try saving again';button.disabled=false}
+    try{const response=await fetch('/api/food-preferences',{method:'PUT',headers:apiHeaders(),body:JSON.stringify(preferences)});const payload=await response.json();if(!response.ok)throw new Error(payload.error||'Could not save your preferences.');foodNote.textContent='Preferences saved to your account. Generating an updated chart with Gemini…';const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});const chartPayload=await chartResponse.json();if(!chartResponse.ok)throw new Error(chartPayload.error||'Preferences were saved, but Gemini could not generate the chart.');chart=normalizeChartSlots(chartPayload.meals);render();button.textContent='Saved ✓';setTimeout(()=>{button.textContent='Save and update chart';button.disabled=false},1500)}catch(error){foodNote.textContent=error.message;button.textContent='Try saving again';button.disabled=false}
   });
   diet.addEventListener('change',render);
   form.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener('change',render));
