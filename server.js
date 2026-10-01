@@ -20,7 +20,59 @@ ALTER TABLE safe_profiles ADD COLUMN IF NOT EXISTS food_chart JSONB NOT NULL DEF
 `)}
 async function sessionUser(req){const value=req.headers.authorization?.replace('Bearer ','');if(!value)return null;const result=await pool.query('SELECT u.* FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token=$1',[value]);return result.rows[0]||null}
 async function askGemini(message){const key=process.env.GEMINI_API_KEY,model=process.env.GEMINI_MODEL||'gemini-3.8-flash';if(!key)throw new Error('Keily AI is not configured yet. Add GEMINI_API_KEY in Render.');const system='You are Keily, a warm, concise safety and wellbeing companion. Reply in plain, supportive language. Never claim to be a doctor, therapist, emergency service, or to have contacted anyone. For immediate danger, encourage the user to call their local emergency number and use Keily Safe Space. Do not provide diagnoses, medication instructions, or shame the user. Keep replies under 110 words.';const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:message}]}],generationConfig:{temperature:.7,maxOutputTokens:260}})});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error?.message||'Gemini could not answer right now.');const reply=payload.candidates?.[0]?.content?.parts?.map(part=>part.text||'').join('').trim();if(!reply)throw new Error('Keily did not receive a reply.');return reply}
-async function generateFoodChart(preferences){const key=process.env.GEMINI_API_KEY,model=process.env.GEMINI_MODEL||'gemini-3.8-flash';if(!key)throw new Error('Keily AI is not configured yet. Add GEMINI_API_KEY in Render.');const prompt='Create a simple, varied one-day food chart as JSON only, shape {"meals":[{"slot":"Breakfast|Lunch|Snack|Dinner","name":"...","ingredients":["..."],"allergens":["..."],"ironRich":false}]}. Give one meal for each slot. Food preference: '+preferences.diet+'. Allergies to avoid completely: '+(preferences.allergies||[]).concat((preferences.customAllergies||'').split(',')).join(', ')||'none stated')+'. Symptoms for gentle context only: '+((preferences.symptoms||[]).join(', ')||'none')+'. Do not make medical claims or promise symptom relief; never include an ingredient matching an allergy; use ordinary accessible foods and include all major ingredients.';const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:.4,maxOutputTokens:1000,responseMimeType:'application/json'}})});const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error?.message||'Gemini could not generate the food chart.');const text=payload.candidates?.[0]?.content?.parts?.map(part=>part.text||'').join('');let parsed;try{parsed=JSON.parse(text)}catch{throw new Error('Gemini returned an invalid food chart. Please try again.')}const slots=['Breakfast','Lunch','Snack','Dinner'];if(!Array.isArray(parsed.meals))throw new Error('Gemini returned an invalid food chart. Please try again.');const meals=parsed.meals.filter(meal=>meal&&slots.includes(meal.slot)&&typeof meal.name==='string'&&Array.isArray(meal.ingredients)).slice(0,4).map(meal=>({slot:meal.slot,name:meal.name.slice(0,100),ingredients:meal.ingredients.filter(x=>typeof x==='string').slice(0,20).map(x=>x.slice(0,60)),allergens:Array.isArray(meal.allergens)?meal.allergens.filter(x=>typeof x==='string').slice(0,20).map(x=>x.slice(0,60)):[],diets:[preferences.diet],ironRich:!!meal.ironRich}));if(slots.some(slot=>!meals.some(meal=>meal.slot===slot)))throw new Error('Gemini returned an incomplete food chart. Please try again.');return meals}
+async function generateFoodChart(preferences) {
+  const key = process.env.GEMINI_API_KEY;
+  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+  if (!key) throw new Error('Keily AI is not configured yet. Add GEMINI_API_KEY in Render.');
+  const allergies = (preferences.allergies || [])
+    .concat((preferences.customAllergies || '').split(','))
+    .map(value => value.trim())
+    .filter(Boolean)
+    .join(', ') || 'none stated';
+  const symptoms = (preferences.symptoms || []).join(', ') || 'none';
+  const prompt = 'Create a simple one-day food chart as JSON only, shaped like ' +
+    '{"meals":[{"slot":"Breakfast|Lunch|Snack|Dinner","name":"...","ingredients":["..."],"allergens":["..."],"ironRich":false}]}. ' +
+    'Give one meal for each slot. Food preference: ' + (preferences.diet || 'vegetarian') +
+    '. Allergies to avoid completely: ' + allergies +
+    '. Symptoms for gentle context only: ' + symptoms +
+    '. Do not make medical claims or promise symptom relief. Never include ingredients matching an allergy. Use ordinary accessible foods and list all major ingredients.';
+  const response = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key),
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 1000, responseMimeType: 'application/json' }
+      })
+    }
+  );
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error?.message || 'Gemini could not generate the food chart.');
+  const text = payload.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('');
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch { throw new Error('Gemini returned an invalid food chart. Please try again.'); }
+  const slots = ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+  if (!parsed || !Array.isArray(parsed.meals)) throw new Error('Gemini returned an invalid food chart. Please try again.');
+  const meals = parsed.meals
+    .filter(meal => meal && slots.includes(meal.slot) && typeof meal.name === 'string' && Array.isArray(meal.ingredients))
+    .slice(0, 4)
+    .map(meal => ({
+      slot: meal.slot,
+      name: meal.name.slice(0, 100),
+      ingredients: meal.ingredients.filter(value => typeof value === 'string').slice(0, 20).map(value => value.slice(0, 60)),
+      allergens: Array.isArray(meal.allergens)
+        ? meal.allergens.filter(value => typeof value === 'string').slice(0, 20).map(value => value.slice(0, 60))
+        : [],
+      diets: [preferences.diet || 'vegetarian'],
+      ironRich: !!meal.ironRich
+    }));
+  if (slots.some(slot => !meals.some(meal => meal.slot === slot))) {
+    throw new Error('Gemini returned an incomplete food chart. Please try again.');
+  }
+  return meals;
+}
 async function getProfile(id){const result=await pool.query('SELECT period_plan,emergency_contacts,water_done,code_hash IS NOT NULL AS has_code_word FROM safe_profiles WHERE user_id=$1',[id]);return result.rows[0]||{period_plan:{},emergency_contacts:{risk:[],nearby:[]},water_done:false,has_code_word:false}}
 const validContacts=list=>Array.isArray(list)&&list.filter(x=>x&&typeof x.name==='string'&&typeof x.phone==='string').slice(0,50).map(x=>({name:x.name.trim().slice(0,60),phone:x.phone.trim().slice(0,30)}));
 async function api(req,res,url){let input,user,id,result;
