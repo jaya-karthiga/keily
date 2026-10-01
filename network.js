@@ -134,6 +134,6 @@ window.addEventListener('load',()=>{
   foodStyles.href='food-planner.css?keily-food=1';
   document.head.append(foodStyles);
   const foodScript=document.createElement('script');
-  foodScript.src='food-planner.js?keily-food=1';
+  foodScript.src='food-planner.js?keily-food=2';
   document.body.append(foodScript);
 });
