@@ -129,4 +129,11 @@ window.addEventListener('load',()=>{
   const profileScript=document.createElement('script');
   profileScript.src='profile.js?keily-profile=1';
   document.body.append(profileScript);
+  const foodStyles=document.createElement('link');
+  foodStyles.rel='stylesheet';
+  foodStyles.href='food-planner.css?keily-food=1';
+  document.head.append(foodStyles);
+  const foodScript=document.createElement('script');
+  foodScript.src='food-planner.js?keily-food=1';
+  document.body.append(foodScript);
 });
