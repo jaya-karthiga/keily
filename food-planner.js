@@ -3,11 +3,9 @@
   if(!wellbeing||document.querySelector('#foodPlanner'))return;
 
   const profile=()=>{try{return JSON.parse(localStorage.getItem('jarvisUser')||'{}')}catch{return {}}};
-  const storeKey=()=>`keilyFoodPreferences:${profile().id||'guest'}`;
-  const readSaved=()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}')}catch{return {}}};
   const commonAllergies=['Peanuts','Tree nuts','Milk / dairy','Egg','Wheat / gluten','Soy','Sesame','Fish','Shellfish'];
   const symptomChoices=['Cramps','Bloating','Nausea','Low energy','Headache','Other'];
-  const chart=[
+  let chart=[
     {slot:'Breakfast',name:'Banana and oat porridge',ingredients:['Oats','Banana','Water'],allergens:['oats'],diets:['vegan','vegetarian','omnivore']},
     {slot:'Breakfast',name:'Ragi and date porridge',ingredients:['Ragi flour','Dates','Water'],allergens:[],diets:['vegan','vegetarian','omnivore']},
     {slot:'Lunch',name:'Vegetable moong dal khichdi',ingredients:['Rice','Moong dal','Carrot','Peas','Spinach','Tomato'],allergens:['legumes'],diets:['vegan','vegetarian','omnivore'],ironRich:true},
@@ -26,14 +24,14 @@
     'legumes':['legume','lentil','dal','bean','pea','chickpea','moong']
   };
   const normalize=value=>String(value||'').trim().toLowerCase();
-  const saved=readSaved();
+  const saved={};
   const allergies=saved.allergies||[];
   const checked=(list,value)=>list.includes(value)?'checked':'';
   const symptoms=saved.symptoms||[];
   const card=document.createElement('article');
   card.id='foodPlanner';
   card.className='food-planner card';
-  card.innerHTML=`<div class="food-planner-heading"><div><p class="eyebrow">FOOD & WELLBEING</p><h3>A gentle food chart</h3><p>Save symptoms and allergies privately, then filter general meal ideas.</p></div><span class="food-private-badge">Saved on this device</span></div>
+  card.innerHTML=`<div class="food-planner-heading"><div><p class="eyebrow">FOOD & WELLBEING</p><h3>A gentle food chart</h3><p>Preferences are stored in your account and sent to Gemini to generate meal ideas.</p></div><span class="food-private-badge">Saved to your account</span></div>
     <form id="foodPreferences" class="food-preferences">
       <fieldset><legend>What symptoms would you like to note?</legend><div class="food-choice-grid">${symptomChoices.map(item=>`<label class="food-choice"><input type="checkbox" name="symptoms" value="${item}" ${checked(symptoms,item)}><span>${item}</span></label>`).join('')}</div></fieldset>
       <fieldset><legend>Choose any known allergies</legend><div class="food-choice-grid">${commonAllergies.map(item=>`<label class="food-choice"><input type="checkbox" name="allergies" value="${item}" ${checked(allergies,item)}><span>${item}</span></label>`).join('')}</div><label class="food-custom-label">Other allergy names<input id="customAllergies" type="text" maxlength="180" placeholder="Separate with commas" value="${(saved.customAllergies||'').replace(/[&<>"']/g,'')}"></label></fieldset>
@@ -52,6 +50,25 @@
   const mealChart=card.querySelector('#mealChart');
   const foodNote=card.querySelector('#foodNote');
   const cycleFocus=card.querySelector('#cycleFoodFocus');
+  const apiHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('keilyToken')||''}`,'Content-Type':'application/json'});
+  const loadAccountFood=async()=>{
+    try{
+      const response=await fetch('/api/food-preferences',{headers:apiHeaders()});
+      if(!response.ok)throw new Error('Could not load your saved food preferences.');
+      const preferences=await response.json();
+      form.querySelectorAll('input[name="symptoms"]').forEach(input=>input.checked=(preferences.symptoms||[]).includes(input.value));
+      form.querySelectorAll('input[name="allergies"]').forEach(input=>input.checked=(preferences.allergies||[]).includes(input.value));
+      card.querySelector('#customAllergies').value=preferences.customAllergies||'';
+      diet.value=preferences.diet||'vegetarian';
+      render();
+      foodNote.textContent='Generating your food chart with Gemini…';
+      const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});
+      const chartPayload=await chartResponse.json();
+      if(!chartResponse.ok)throw new Error(chartPayload.error||'Could not generate your food chart.');
+      chart=chartPayload.meals||[];
+      render();
+    }catch(error){foodNote.textContent=`${error.message} Save your preferences to try again.`}
+  };
 
   const cycleStage=()=>{
     const savedUser=profile();
@@ -99,14 +116,16 @@
     const selectedSymptoms=[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value);
     foodNote.textContent=selectedSymptoms.length?`Noted: ${selectedSymptoms.join(', ')}. These are general meal ideas, not symptom treatment. Check ingredients and cross-contact warnings with the food provider, especially for allergies.`:'Meal ideas are general wellbeing suggestions, not treatment. Always check ingredients and cross-contact warnings with the food provider, especially for allergies.';
   };
-  form.addEventListener('submit',event=>{
+  form.addEventListener('submit',async event=>{
     event.preventDefault();
     const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergensFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value};
-    try{localStorage.setItem(storeKey(),JSON.stringify(preferences));render();const button=form.querySelector('button[type="submit"]');button.textContent='Saved ✓';setTimeout(()=>button.textContent='Save and update chart',1500)}catch{alert('Could not save these preferences on this device.')}
+    const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving…';
+    try{const response=await fetch('/api/food-preferences',{method:'PUT',headers:apiHeaders(),body:JSON.stringify(preferences)});const payload=await response.json();if(!response.ok)throw new Error(payload.error||'Could not save your preferences.');foodNote.textContent='Preferences saved to your account. Generating an updated chart with Gemini…';const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});const chartPayload=await chartResponse.json();if(!chartResponse.ok)throw new Error(chartPayload.error||'Preferences were saved, but Gemini could not generate the chart.');chart=chartPayload.meals||[];render();button.textContent='Saved ✓';setTimeout(()=>{button.textContent='Save and update chart';button.disabled=false},1500)}catch(error){foodNote.textContent=error.message;button.textContent='Try saving again';button.disabled=false}
   });
   diet.addEventListener('change',render);
   form.querySelectorAll('input[type="checkbox"]').forEach(input=>input.addEventListener('change',render));
   card.querySelector('#customAllergies').addEventListener('input',render);
   document.querySelector('#periodForm')?.addEventListener('submit',()=>setTimeout(render,0));
   render();
+  loadAccountFood();
 })();
