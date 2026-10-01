@@ -88,11 +88,11 @@
     return {day,length,phase};
   };
 
-  const allergensFromForm=()=>{
+  function allergiesFromForm(){
     const selected=[...form.querySelectorAll('input[name="allergies"]:checked')].map(input=>input.value);
     const custom=card.querySelector('#customAllergies').value.split(',').map(normalize).filter(Boolean);
     return [...new Set([...selected,...custom])];
-  };
+  }
   const safeForAllergy=meal=>{
     const searchable=normalize([...meal.ingredients,...meal.allergens].join(' '));
     return !allergiesFromForm().some(item=>{
@@ -118,7 +118,7 @@
   };
   form.addEventListener('submit',async event=>{
     event.preventDefault();
-    const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergensFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value};
+    const preferences={symptoms:[...form.querySelectorAll('input[name="symptoms"]:checked')].map(input=>input.value),allergies:allergiesFromForm(),customAllergies:card.querySelector('#customAllergies').value,diet:diet.value};
     const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving…';
     try{const response=await fetch('/api/food-preferences',{method:'PUT',headers:apiHeaders(),body:JSON.stringify(preferences)});const payload=await response.json();if(!response.ok)throw new Error(payload.error||'Could not save your preferences.');foodNote.textContent='Preferences saved to your account. Generating an updated chart with Gemini…';const chartResponse=await fetch('/api/food-chart',{headers:apiHeaders()});const chartPayload=await chartResponse.json();if(!chartResponse.ok)throw new Error(chartPayload.error||'Preferences were saved, but Gemini could not generate the chart.');chart=chartPayload.meals||[];render();button.textContent='Saved ✓';setTimeout(()=>{button.textContent='Save and update chart';button.disabled=false},1500)}catch(error){foodNote.textContent=error.message;button.textContent='Try saving again';button.disabled=false}
   });
